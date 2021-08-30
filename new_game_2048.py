@@ -3,12 +3,17 @@ import random
 import time
 import os
 # ----------
-dis_resol = {'height':500, 'width':600}
-color = {'bg': (113,89,86)}
+dis_resol = {'height':600, 'width':500}
+
+color = {'2'   :(219,215,210), 'bg'   : (113,89,86),
+         '4'   :(201,190,156), 'hole' : (169,120,117),
+         '8'   :(244,164,96),
+         '16'  :(250,167,108) # 233 150 122
+         }
 # ----------
 pygame.init()
 # open the window
-window = pygame.display.set_mode((dis_resol['height'], dis_resol['width']))
+window = pygame.display.set_mode((dis_resol['width'], dis_resol['height']))
 pygame.display.set_caption('2048')
 pygame.display.update()
 # ==========
@@ -109,31 +114,39 @@ class Field:
         self.table = [[None for i in range(4)] for i in range(4)]
         # создание ОДНОЙ рандомной точки (вторая генерируется в модуле self.run)
         self.gen_new_point()
-        # self.table[0][0] = Point(self, 0, 0)
-        # self.table[0][1] = Point(self, 0, 1)
     def gen_new_point(self):
         while True:
             pos = [random.randint(0,3) for i in range(2)]
             if self.table[pos[0]][pos[1]] == None:
                 self.table[pos[0]][pos[1]] = Point(self, *pos)
                 break
-    def command(self):
-        # commands = ['right', 'left', 'up', 'down']
-        # while True:
-        #     user = input('Go: ')
-        #     if user in commands:
-        #         return user
-        #     else:
-        #         print('Incorrect input')
-        pass
     def show(self):
-        os.system('cls||clear')
-        for y in range(len(self.table)):
-            for x in range(len(self.table[y])):
-                print('_____' if self.table[y][x]==None else ' '*(5-len(str(self.table[y][x].points))) +str(self.table[y][x].points), end=' ')
-            print()
+        # os.system('cls||clear')
+        # for y in range(len(self.table)):
+        #     for x in range(len(self.table[y])):
+        #         print('_____' if self.table[y][x]==None else ' '*(5-len(str(self.table[y][x].points))) +str(self.table[y][x].points), end=' ')
+        #     print()
         # ----
-        #window.fill(color['bg'])
+        x_pos = 0
+        y_pos = 0
+        side_of_window = dis_resol['width']
+        numb_of_side_blocks = 4
+        a = (5*side_of_window)/(6*numb_of_side_blocks+1)
+        b = side_of_window/(6*numb_of_side_blocks+1)
+        window.fill(color['bg'])
+        for y in range(len(self.table)):
+            y_pos += b
+            x_pos = 0
+            for x in range(len(self.table[y])):
+                x_pos += b
+                if self.table[y][x] != None:
+                    pygame.draw.rect(window, color[str(self.table[y][x].points)], (x_pos, y_pos, a, a))
+                else:
+                    pygame.draw.rect(window, color['hole'], (x_pos, y_pos, a, a))
+                x_pos += a
+            y_pos += a
+
+        pygame.display.update()
 
     def slide(self, der:str):
         if der == 'right':
@@ -177,7 +190,6 @@ class Field:
                     return False
         else:
             return True
-
     def run(self):
         game_end = False
         user = 1
@@ -191,7 +203,8 @@ class Field:
             self.show()
 
             # проверка на проигрыш
-            self.lose_cheak()
+            if self.lose_cheak():
+                game_end = True
 
             # ввод пользователя и работа с полем
             # user = self.command()
@@ -209,7 +222,7 @@ class Field:
                         user = 'down'
             if user != None:
                 self.slide(user)
-            time.sleep(0.1)
+            time.sleep(0.01)
 
 Game = Field()
 Game.run()
