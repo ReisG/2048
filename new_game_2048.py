@@ -139,6 +139,28 @@ class Field:
                 for x in range(4):
                     if self.table[y][x] != None:
                         self.table[y][x].slide_down()
+    def lose_cheak(self):
+        # иначе проверяем, есть ли по соседству две одинаковые клетки
+        for y in range(len(self.table)):
+            for x in range(len(self.table)):
+                inspecting_dot = self.table[y][x]
+                if inspecting_dot == None:
+                    return False
+                # слева клетки
+                if x != 0 and inspecting_dot.points == self.table[y][x-1].points:
+                    return False
+                # сверху клетки
+                if y != 0 and inspecting_dot.points == self.table[y-1][x].points:
+                    return False
+                # справа клетки
+                if x != 3 and inspecting_dot.points == self.table[y][x+1]:
+                    return False
+                # снизу клетки
+                if y != 3 and inspecting_dot.points == self.table[y+1][x]:
+                    return False
+        else:
+            return True
+
     def run(self):
         end = False
         while not end:
@@ -148,8 +170,8 @@ class Field:
             # показываем игровое поле
             self.show()
 
-            # здесь должна быть проверка на проигрыш
-            pass
+            # проверка на проигрыш
+            self.lose_cheak()
 
             # ввод пользователя и работа с полем
             user = self.command()
