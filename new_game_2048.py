@@ -48,11 +48,31 @@ class Point:
             self.destroy()
 
     def slide_up(self):
-        # не работает
         if self.y == 0:
             return
 
         for y in range(self.y-1, -1, -1):
+            inspecting_dot = self.game.table[y][self.x]
+            if inspecting_dot == None:
+                continue
+            if inspecting_dot.points == self.points:
+                inspecting_dot.next_score()
+                self.destroy()
+                break
+            else:
+                if self.y != y+1:
+                    self.game.table[y+1][self.x] = Point(self.game, y+1, self.x, self.points)
+                    self.destroy()
+                break
+        else:
+            self.game.table[0][self.x] = Point(self.game, 0, self.x, self.points)
+            self.destroy()
+
+    def slide_down(self):
+        if self.y == 3:
+            return
+
+        for y in range(self.y+1, 4):
             inspecting_dot = self.game.table[y][self.x]
             if inspecting_dot == None:
                 continue
@@ -66,11 +86,9 @@ class Point:
                     self.destroy()
                 break
         else:
-            self.game.table[0][self.x] = Point(self.game, 0, self.x, self.points)
+            self.game.table[3][self.x] = Point(self.game, 3, self.x, self.points)
             self.destroy()
 
-    def slide_down(self):
-        pass
     def next_score(self):
         self.points *= 2
     def destroy(self):
@@ -119,7 +137,10 @@ class Field:
                     if self.table[y][x] != None:
                         self.table[y][x].slide_up()
         elif der == 'down':
-            pass
+            for y in range(3, -1, -1):
+                for x in range(4):
+                    if self.table[y][x] != None:
+                        self.table[y][x].slide_down()
     def run(self):
         end = False
         while not end:
