@@ -1,4 +1,5 @@
 import random
+
 class Point:
     def __init__(self, field, y:int, x:int, score:int=0):
         self.game = field
@@ -46,7 +47,6 @@ class Point:
         else:
             self.game.table[self.y][0] = Point(self.game, self.y, 0, self.points)
             self.destroy()
-
     def slide_up(self):
         if self.y == 0:
             return
@@ -67,7 +67,6 @@ class Point:
         else:
             self.game.table[0][self.x] = Point(self.game, 0, self.x, self.points)
             self.destroy()
-
     def slide_down(self):
         if self.y == 3:
             return
@@ -88,7 +87,6 @@ class Point:
         else:
             self.game.table[3][self.x] = Point(self.game, 3, self.x, self.points)
             self.destroy()
-
     def next_score(self):
         self.points *= 2
     def destroy(self):
