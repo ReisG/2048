@@ -1,5 +1,17 @@
+import pygame
 import random
-
+import time
+import os
+# ----------
+dis_resol = {'height':500, 'width':600}
+color = {'bg': (113,89,86)}
+# ----------
+pygame.init()
+# open the window
+window = pygame.display.set_mode((dis_resol['height'], dis_resol['width']))
+pygame.display.set_caption('2048')
+pygame.display.update()
+# ==========
 class Point:
     def __init__(self, field, y:int, x:int, score:int=0):
         self.game = field
@@ -106,18 +118,23 @@ class Field:
                 self.table[pos[0]][pos[1]] = Point(self, *pos)
                 break
     def command(self):
-        commands = ['right', 'left', 'up', 'down']
-        while True:
-            user = input('Go: ')
-            if user in commands:
-                return user
-            else:
-                print('Incorrect input')
+        # commands = ['right', 'left', 'up', 'down']
+        # while True:
+        #     user = input('Go: ')
+        #     if user in commands:
+        #         return user
+        #     else:
+        #         print('Incorrect input')
+        pass
     def show(self):
+        os.system('cls||clear')
         for y in range(len(self.table)):
             for x in range(len(self.table[y])):
                 print('_____' if self.table[y][x]==None else ' '*(5-len(str(self.table[y][x].points))) +str(self.table[y][x].points), end=' ')
             print()
+        # ----
+        #window.fill(color['bg'])
+
     def slide(self, der:str):
         if der == 'right':
             for x in range(3,-1,-1):
@@ -162,11 +179,14 @@ class Field:
             return True
 
     def run(self):
-        end = False
-        while not end:
+        game_end = False
+        user = 1
+        while not game_end:
             # каждый ход генерируем новую точку
-            self.gen_new_point()
+            if user != None:
+                self.gen_new_point()
 
+            user = None
             # показываем игровое поле
             self.show()
 
@@ -174,8 +194,22 @@ class Field:
             self.lose_cheak()
 
             # ввод пользователя и работа с полем
-            user = self.command()
-            self.slide(user)
+            # user = self.command()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    game_end = True
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP:
+                        user = 'up'
+                    elif event.key == pygame.K_LEFT:
+                        user = 'left'
+                    elif event.key == pygame.K_RIGHT:
+                        user = 'right'
+                    elif event.key == pygame.K_DOWN:
+                        user = 'down'
+            if user != None:
+                self.slide(user)
+            time.sleep(0.1)
 
 Game = Field()
 Game.run()
