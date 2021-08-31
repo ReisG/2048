@@ -221,8 +221,6 @@ class Field:
             return False
     def run(self):
         game_end = False
-        won = False
-        lost = False
         user = 1
         while not game_end:
             # каждый ход генерируем новую точку
