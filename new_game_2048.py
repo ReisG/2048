@@ -19,6 +19,7 @@ color = {'2'   :(219,215,210), 'bg'   : (113,89,86),
          '512' :(69,206,162),
          '1024':(128,218,235)
          }
+total_score = 0
 # ----------
 pygame.init()
 # open the window
@@ -115,6 +116,8 @@ class Point:
             self.destroy()
     def next_score(self):
         self.points *= 2
+        global total_score
+        total_score += self.points
     def destroy(self):
         self.game.table[self.y][self.x] = None
 
@@ -136,13 +139,19 @@ class Field:
         #         print('_____' if self.table[y][x]==None else ' '*(5-len(str(self.table[y][x].points))) +str(self.table[y][x].points), end=' ')
         #     print()
         # ----
+        # Фон
+        window.fill(color['bg'])
+        # интерфейс
+        f2 = pygame.font.SysFont('serif', 50)
+        text2 = f2.render('Score: ' + str(total_score), 1, (225, 225, 225))
+        window.blit(text2, (dis_resol['width']/2-80, 20))
+        # игровое поле
         x_pos = 0
-        y_pos = 0
+        y_pos = 100
         side_of_window = dis_resol['width']
         numb_of_side_blocks = 4
         a = (5*side_of_window)/(6*numb_of_side_blocks+1)
         b = side_of_window/(6*numb_of_side_blocks+1)
-        window.fill(color['bg'])
         for y in range(len(self.table)):
             y_pos += b
             x_pos = 0
