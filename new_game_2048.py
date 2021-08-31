@@ -181,7 +181,7 @@ class Field:
                     if self.table[y][x] != None:
                         self.table[y][x].slide_left()
         elif der == 'up':
-            for y in range(3, -1, -1):
+            for y in range(4):
                 for x in range(4):
                     if self.table[y][x] != None:
                         self.table[y][x].slide_up()
