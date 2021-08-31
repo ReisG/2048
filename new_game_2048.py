@@ -14,7 +14,10 @@ color = {'2'   :(219,215,210), 'bg'   : (113,89,86),
          '16'  :(233,150,122), # 233 150 122
          '32'  :(222,99,133),
          '64'  :(184,59,94),
-         '128' :(252,217,117)
+         '128' :(252,217,117),
+         '256' :(218,216,113),
+         '512' :(69,206,162),
+         '1024':(128,218,235)
          }
 # ----------
 pygame.init()
@@ -153,7 +156,6 @@ class Field:
             y_pos += a
 
         pygame.display.update()
-
     def slide(self, der:str):
         if der == 'right':
             for x in range(3,-1,-1):
@@ -196,20 +198,55 @@ class Field:
                     return False
         else:
             return True
+    def win_cheak(self):
+        def f(lst:list):
+            for y in lst:
+                for x in y:
+                    yield x
+        for i in f(self.table):
+            if i != None:
+                if i.points == 2048:
+                    return True
+        else:
+            return False
+    def is_holes_here(self):
+        def f(lst:list):
+            for y in lst:
+                for x in y:
+                    yield x
+        for i in f(self.table):
+            if i == None:
+                return True
+        else:
+            return False
     def run(self):
         game_end = False
+        won = False
+        lost = False
         user = 1
         while not game_end:
             # каждый ход генерируем новую точку
-            if user != None:
+            if user != None and self.is_holes_here():
                 self.gen_new_point()
 
             user = None
             # показываем игровое поле
             self.show()
 
+            # проверка на выигрыш
+            if self.win_cheak():
+                print('-----------------')
+                print('You won')
+                print('-----------------')
+                time.sleep(5)
+                game_end = True
+
             # проверка на проигрыш
             if self.lose_cheak():
+                print('-----------------')
+                print('You lost')
+                print('-----------------')
+                time.sleep(5)
                 game_end = True
 
             # ввод пользователя и работа с полем
