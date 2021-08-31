@@ -8,10 +8,10 @@ import os
 # ---------
 dis_resol = {'height':600, 'width':500}
 
-color = {'2'   :(219,215,210), 'bg'   : (113,89,86),
-         '4'   :(201,190,156), 'hole' : (169,120,117),
-         '8'   :(244,164,96),
-         '16'  :(233,150,122), # 233 150 122
+color = {'2'   :(219,215,210), 'bg'     : (113,89,86),
+         '4'   :(201,190,156), 'hole'   : (169,120,117),
+         '8'   :(244,164,96),  'numbers': (120,120,120),
+         '16'  :(233,150,122),
          '32'  :(222,99,133),
          '64'  :(184,59,94),
          '128' :(252,217,117),
@@ -144,7 +144,7 @@ class Field:
         # интерфейс
         f2 = pygame.font.SysFont('serif', 50)
         text2 = f2.render('Score: ' + str(total_score), 1, (225, 225, 225))
-        window.blit(text2, (dis_resol['width']/2-80, 20))
+        window.blit(text2, (dis_resol['width']/2-70-10*len(str(total_score)), 20))
         # игровое поле
         x_pos = 0
         y_pos = 100
@@ -159,6 +159,10 @@ class Field:
                 x_pos += b
                 if self.table[y][x] != None:
                     pygame.draw.rect(window, color[str(self.table[y][x].points)], (x_pos, y_pos, a, a))
+                    # числа на блоках
+                    f2 = pygame.font.SysFont('serif', 40)
+                    text2 = f2.render(str(self.table[y][x].points), 1, color['numbers'])
+                    window.blit(text2, (x_pos+a/2-10*len(str(self.table[y][x].points)), y_pos+a/2-20))
                 else:
                     pygame.draw.rect(window, color['hole'], (x_pos, y_pos, a, a))
                 x_pos += a
