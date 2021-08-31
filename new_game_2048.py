@@ -235,12 +235,14 @@ class Field:
     def run(self):
         game_end = False
         user = 1
+        sensible_movement = True
         while not game_end:
             # каждый ход генерируем новую точку
-            if user != None and self.is_holes_here():
+            if user != None and sensible_movement and self.is_holes_here():
                 self.gen_new_point()
 
             user = None
+            sensible_movement = True
             # показываем игровое поле
             self.show()
 
@@ -275,7 +277,15 @@ class Field:
                     elif event.key == pygame.K_DOWN:
                         user = 'down'
             if user != None:
+                # здесь идёт проверка на нужность хода (поменяет ли это действие позицию на поле)
+                # тоесть мы сначала делаем копию позиции на поле, заменяя объекты на нём числовыми значениями points
+                last_frame = [[x.points if x != None else None for x in y] for y in self.table]
+                # затем двигаем поле в нужную сторону
                 self.slide(user)
+                # после сравниваем поле до и после изменений
+                now_frame = [[x.points if x != None else None for x in y] for y in self.table]
+                sensible_movement = False if last_frame == now_frame else True
+                # эта проверка нужна для того, чтобы понять нужно ли создавать новый блок на поле или нет
             time.sleep(0.01)
 
 Game = Field()
