@@ -1,5 +1,29 @@
+import pygame
 import random
+import time
+import os
+# ----------
+dis_resol = {'height':600, 'width':500}
 
+color = {'2'   :(219,215,210), 'bg'     : (113,89,86),
+         '4'   :(201,190,156), 'hole'   : (169,120,117),
+         '8'   :(244,164,96),  'numbers': (120,120,120),
+         '16'  :(233,150,122),
+         '32'  :(222,99,133),
+         '64'  :(184,59,94),
+         '128' :(252,217,117),
+         '256' :(218,216,113),
+         '512' :(69,206,162),
+         '1024':(128,218,235)
+         }
+total_score = 0
+# ----------
+pygame.init()
+# open the window
+window = pygame.display.set_mode((dis_resol['width'], dis_resol['height']))
+pygame.display.set_caption('2048')
+pygame.display.update()
+# ==========
 class Point:
     def __init__(self, field, y:int, x:int, score:int=0):
         self.game = field
@@ -89,6 +113,8 @@ class Point:
             self.destroy()
     def next_score(self):
         self.points *= 2
+        global total_score
+        total_score += self.points
     def destroy(self):
         self.game.table[self.y][self.x] = None
 
@@ -97,27 +123,49 @@ class Field:
         self.table = [[None for i in range(4)] for i in range(4)]
         # создание ОДНОЙ рандомной точки (вторая генерируется в модуле self.run)
         self.gen_new_point()
-        # self.table[0][0] = Point(self, 0, 0)
-        # self.table[0][1] = Point(self, 0, 1)
     def gen_new_point(self):
         while True:
             pos = [random.randint(0,3) for i in range(2)]
             if self.table[pos[0]][pos[1]] == None:
                 self.table[pos[0]][pos[1]] = Point(self, *pos)
                 break
-    def command(self):
-        commands = ['right', 'left', 'up', 'down']
-        while True:
-            user = input('Go: ')
-            if user in commands:
-                return user
-            else:
-                print('Incorrect input')
     def show(self):
+        # os.system('cls||clear')
+        # for y in range(len(self.table)):
+        #     for x in range(len(self.table[y])):
+        #         print('_____' if self.table[y][x]==None else ' '*(5-len(str(self.table[y][x].points))) +str(self.table[y][x].points), end=' ')
+        #     print()
+        # ----
+        # Фон
+        window.fill(color['bg'])
+        # интерфейс
+        f2 = pygame.font.SysFont('serif', 50)
+        text2 = f2.render('Score: ' + str(total_score), 1, (225, 225, 225))
+        window.blit(text2, (dis_resol['width']/2-70-10*len(str(total_score)), 20))
+        # игровое поле
+        x_pos = 0
+        y_pos = 100
+        side_of_window = dis_resol['width']
+        numb_of_side_blocks = 4
+        a = (5*side_of_window)/(6*numb_of_side_blocks+1)
+        b = side_of_window/(6*numb_of_side_blocks+1)
         for y in range(len(self.table)):
+            y_pos += b
+            x_pos = 0
             for x in range(len(self.table[y])):
-                print('_____' if self.table[y][x]==None else ' '*(5-len(str(self.table[y][x].points))) +str(self.table[y][x].points), end=' ')
-            print()
+                x_pos += b
+                if self.table[y][x] != None:
+                    pygame.draw.rect(window, color[str(self.table[y][x].points)], (x_pos, y_pos, a, a))
+                    # числа на блоках
+                    f2 = pygame.font.SysFont('serif', 40)
+                    text2 = f2.render(str(self.table[y][x].points), 1, color['numbers'])
+                    window.blit(text2, (x_pos+a/2-10*len(str(self.table[y][x].points)), y_pos+a/2-20))
+                else:
+                    pygame.draw.rect(window, color['hole'], (x_pos, y_pos, a, a))
+                x_pos += a
+            y_pos += a
+
+        pygame.display.update()
     def slide(self, der:str):
         if der == 'right':
             for x in range(3,-1,-1):
@@ -130,7 +178,7 @@ class Field:
                     if self.table[y][x] != None:
                         self.table[y][x].slide_left()
         elif der == 'up':
-            for y in range(3, -1, -1):
+            for y in range(4):
                 for x in range(4):
                     if self.table[y][x] != None:
                         self.table[y][x].slide_up()
@@ -160,22 +208,82 @@ class Field:
                     return False
         else:
             return True
-
+    def win_cheak(self):
+        def f(lst:list):
+            for y in lst:
+                for x in y:
+                    yield x
+        for i in f(self.table):
+            if i != None:
+                if i.points == 2048:
+                    return True
+        else:
+            return False
+    def is_holes_here(self):
+        def f(lst:list):
+            for y in lst:
+                for x in y:
+                    yield x
+        for i in f(self.table):
+            if i == None:
+                return True
+        else:
+            return False
     def run(self):
-        end = False
-        while not end:
+        game_end = False
+        user = 1
+        sensible_movement = True
+        while not game_end:
             # каждый ход генерируем новую точку
-            self.gen_new_point()
+            if user != None and sensible_movement and self.is_holes_here():
+                self.gen_new_point()
 
+            user = None
+            sensible_movement = True
             # показываем игровое поле
             self.show()
 
+            # проверка на выигрыш
+            if self.win_cheak():
+                print('-----------------')
+                print('You won')
+                print('-----------------')
+                time.sleep(5)
+                game_end = True
+
             # проверка на проигрыш
-            self.lose_cheak()
+            if self.lose_cheak():
+                print('-----------------')
+                print('You lost')
+                print('-----------------')
+                time.sleep(5)
+                game_end = True
 
             # ввод пользователя и работа с полем
-            user = self.command()
-            self.slide(user)
+            # user = self.command()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    game_end = True
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP:
+                        user = 'up'
+                    elif event.key == pygame.K_LEFT:
+                        user = 'left'
+                    elif event.key == pygame.K_RIGHT:
+                        user = 'right'
+                    elif event.key == pygame.K_DOWN:
+                        user = 'down'
+            if user != None:
+                # здесь идёт проверка на нужность хода (поменяет ли это действие позицию на поле)
+                # тоесть мы сначала делаем копию позиции на поле, заменяя объекты на нём числовыми значениями points
+                last_frame = [[x.points if x != None else None for x in y] for y in self.table]
+                # затем двигаем поле в нужную сторону
+                self.slide(user)
+                # после сравниваем поле до и после изменений
+                now_frame = [[x.points if x != None else None for x in y] for y in self.table]
+                sensible_movement = False if last_frame == now_frame else True
+                # эта проверка нужна для того, чтобы понять нужно ли создавать новый блок на поле или нет
+            time.sleep(0.01)
 
 Game = Field()
 Game.run()
